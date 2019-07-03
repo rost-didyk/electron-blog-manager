@@ -1,0 +1,40 @@
+{
+  "name": "electron-blog-manager",
+  "version": "1.0.0",
+  "description": "Electron blog manager",
+  "main": "./bundle/main.js",
+  "repository": "git@github.com:rost-didyk/electron-blog-manager.git",
+  "author": "Rost Didyk <didykr.ua@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "yarn compile && electron-builder",
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-icons": "^3.7.0",
+    "react-redux": "^7.1.0",
+    "redux": "^4.0.1",
+    "redux-actions": "^2.6.5",
+    "redux-logger": "^3.0.6",
+    "redux-observable": "^1.1.0",
+    "rxjs": "^6.5.2",
+    "source-map-support": "^0.5.12"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.0.0",
+    "bootstrap": "^4.3.1",
+    "electron": "^5.0.6",
+    "electron-builder": "^20.44.4",
+    "electron-webpack": "^2.7.2",
+    "eslint": "^6.0.1",
+    "reactstrap": "^8.0.0",
+    "styled-components": "^4.3.2",
+    "webpack": "^4.35.2"
+  }
+}
