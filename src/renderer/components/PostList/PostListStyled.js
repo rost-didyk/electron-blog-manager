@@ -27,6 +27,7 @@ const Styled = styled.div`
     align-items: center;
     padding: 0 20px;
     cursor: pointer;
+    &.post-list_item--active,
     &:hover {
       background-color: #f2f2f2;
     }
@@ -34,8 +35,14 @@ const Styled = styled.div`
       padding-right: 20px;
     }
     .post-list_item-title {
+      display: inline-block;
       font-size: 16px;
       font-weight: 500;
+      max-width: 190px;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 5px;
+      text-overflow: ellipsis;
     }
     .post-list_item-date {
       text-align: right;

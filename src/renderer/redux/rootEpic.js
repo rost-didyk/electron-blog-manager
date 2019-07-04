@@ -1,7 +1,7 @@
 import { combineEpics } from 'redux-observable';
 
-import skeletonModuleEpics from './modules/skeletonModule/epics';
+import blogModuleEpics from './modules/blogModule/epics';
 
 export default combineEpics(
-  skeletonModuleEpics
+  blogModuleEpics
 );

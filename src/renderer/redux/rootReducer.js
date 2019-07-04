@@ -1,7 +1,7 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from 'redux';
 
-import skeletonModuleState, { storeName } from './modules/skeletonModule/duck';
+import blogModule, { storeName as blogModuleStoreName } from './modules/blogModule/duck';
 
 export default () => combineReducers({
-  [storeName]: skeletonModuleState,
+  [blogModuleStoreName]: blogModule,
 });
