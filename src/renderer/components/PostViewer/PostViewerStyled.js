@@ -36,6 +36,38 @@ const Styled = styled.div`
      height: 100vh;
      overflow: scroll;
      padding: 20px 20px 80px 20px;
+     
+     .post-viewer-content__comments {
+       margin-top: 30px;
+       .post-viewer-content__comments-count {
+          color: #888;
+          border-top: 1px solid #888;
+       }
+       .post-viewer-content__comments-create {
+          margin-bottom: 20px;
+       }
+       .post-viewer-content__comments-item {
+          margin-bottom: 20px;
+          .toast {
+              max-width: 100%;
+              box-shadow: none;
+          }
+          .mr-auto {
+            width: 100%;
+          }
+          .post-viewer-content__comments-title {
+            display: inline-block;
+          }
+          .post-viewer-content__comments-icons {
+            display: inline-block;
+            float: right;
+            > a {
+              margin-left: 10px;
+              cursor: pointer;
+            }
+          }
+       }
+     }
   }
   
 `;

@@ -1,6 +1,8 @@
 import React from 'react';
 import PT from 'prop-types';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { Toast, ToastBody, ToastHeader, Button} from 'reactstrap';
+import { FaPlus } from 'react-icons/fa';
 
 import Styled from './PostViewerStyled';
 
@@ -40,7 +42,37 @@ const PostViewer = ({ post, handleEdit, handelRemove }) => {
       </div>
 
       <div className="post-viewer-content">
-        { post.body }
+        <div className="post-viewer-content__body">{ post.body }</div>
+        <div className="post-viewer-content__comments">
+          <p className="post-viewer-content__comments-count">{ post.comments.length } comments</p>
+          <button color="info" className="post-viewer-content__comments-create">
+            <FaPlus size="16px"/> Add comment
+          </button>
+          { post.comments.map(comment => (
+            <div className="post-viewer-content__comments-item">
+              <Toast>
+                <ToastHeader>
+                  <div className="post-viewer-content__comments-title">
+                    { comment.email }
+                  </div>
+
+                  <div className="post-viewer-content__comments-icons">
+                    <a onClick={() => handleEdit('post', 'edit')}>
+                      <FaEdit size="16px"/>
+                    </a>
+                    <a onClick={() => confirm('Remove this comments?') && handelRemove(post.id)}>
+                      <FaTrash size="16px"/>
+                    </a>
+                  </div>
+                </ToastHeader>
+                <ToastBody>
+                  { comment.body }
+                </ToastBody>
+              </Toast>
+            </div>
+          )) }
+
+        </div>
       </div>
     </Styled>
   )

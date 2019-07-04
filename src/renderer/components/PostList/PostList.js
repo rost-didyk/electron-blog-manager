@@ -6,7 +6,6 @@ import { Form, Input } from 'reactstrap';
 
 import Styled from './PostListStyled';
 
-
 const PostList = ({ posts, activePostId, handleSelectBlogPost, handleBlogPostSearch }) => {
   return (
     <Styled>
