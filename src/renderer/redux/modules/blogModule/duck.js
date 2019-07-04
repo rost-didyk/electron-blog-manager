@@ -52,6 +52,8 @@ export const actions = {
   upsertBlogPost: payload => ({ type: actionTypes.UPSERT_BLOG_POST, payload }),
   upsertBlogPostSuccess: ({ data, isInsertMode }) => ({ type: actionTypes.UPSERT_BLOG_POST_SUCCESS, payload: { data, isInsertMode } }),
 
+  removeBlogPost: postId => ({ type: actionTypes.REMOVE_BLOG_POST, payload: postId }),
+  removeBlogPostSuccess: postId => ({ type: actionTypes.REMOVE_BLOG_POST_SUCCESS, payload: postId }),
 
   requestError: payload => ({ type: actionTypes.REQUEST_ERROR, payload }),
 
@@ -92,6 +94,14 @@ const reducers = {
 
     return ({ ...state, posts: updatedPosts });
 
+  },
+
+  [actionTypes.REMOVE_BLOG_POST_SUCCESS]: (state, { payload: { postId } }) => {
+    return {
+      ...state,
+      posts: state.posts.filter(post => post.id !== postId),
+      selectedPostId: null
+    }
   },
 
   [actionTypes.SELECT_BLOG_POST]: (state, { payload: selectedPostId }) => ({ ...state, selectedPostId }),

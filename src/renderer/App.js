@@ -41,7 +41,8 @@ const App = ({
   searchInBlogEntity,
   openBlogEntityUpsertForm,
   closeBlogEntityUpsertForm,
-  upsertBlogPost
+  upsertBlogPost,
+  removeBlogPost
 }) => {
 
   useEffect(() => { fetchBlogEntity() }, []);
@@ -62,6 +63,7 @@ const App = ({
           <PostViewer
             post={selectedPost}
             handleEdit={openBlogEntityUpsertForm}
+            handelRemove={removeBlogPost}
           />
         </div>
       </StyledContainer>
@@ -91,6 +93,7 @@ App.propTypes = {
   openBlogEntityUpsertForm: PT.func,
   closeBlogEntityUpsertForm: PT.func,
   upsertBlogPost: PT.func,
+  removeBlogPost: PT.func
 };
 
 const EnchApp = flowRight([withBlogModule()])(App);

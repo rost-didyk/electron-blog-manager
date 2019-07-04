@@ -33,6 +33,17 @@ export default combineEpics(
 
     })
   ),
+  // delete blog post
+  action$ => action$.pipe(
+    ofType(actionTypes.REMOVE_BLOG_POST),
+    mergeMap(({ payload: postId }) => {
+      const method = 'DELETE';
+      const url = endpoints.POSTS_URI + '/' + postId;
+
+      return ajaxCall( method, url, null, actions.removeBlogPostSuccess, { postId } );
+
+    })
+  ),
   // search DEBOUNCED
   action$ => action$.pipe(
     ofType(actionTypes.SEARCH_IN_BLOG_ENTITY),
