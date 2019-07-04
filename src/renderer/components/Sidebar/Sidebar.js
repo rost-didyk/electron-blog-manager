@@ -5,7 +5,7 @@ import { Button } from 'reactstrap';
 
 import Styled from './SidebarStyled';
 
-const Sidebar = () => {
+const Sidebar = ({ handleCreate }) => {
   return (
     <Styled>
       <div className="sidebar-logo">
@@ -30,13 +30,17 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-create-post">
-        <Button color="info">
+        <Button color="info" onClick={() => handleCreate('post', 'create')}>
           <FaPlus size="24px"/>
         </Button>
       </div>
 
     </Styled>
   )
+};
+
+Sidebar.propTypes = {
+  handleCreate: PT.func
 };
 
 export default Sidebar;

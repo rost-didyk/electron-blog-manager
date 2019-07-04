@@ -29,7 +29,7 @@ const Styled = styled.div`
     cursor: pointer;
     &.post-list_item--active,
     &:hover {
-      background-color: #f2f2f2;
+      background-color: #dfe4f1;
     }
     .post-list_item-icon {
       padding-right: 20px;

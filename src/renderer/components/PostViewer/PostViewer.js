@@ -4,7 +4,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 
 import Styled from './PostViewerStyled';
 
-const PostViewer = ({ post }) => {
+const PostViewer = ({ post, handleEdit }) => {
 
   if(!post) return (
     <Styled>
@@ -30,7 +30,7 @@ const PostViewer = ({ post }) => {
         </div>
 
         <div className="post-viewer-toolbox__right">
-          <a className="post-viewer-toolbox__icon">
+          <a className="post-viewer-toolbox__icon" onClick={() => handleEdit('post', 'edit')}>
             <FaEdit size="20px"/>
           </a>
           <a className="post-viewer-toolbox__icon">
@@ -48,7 +48,9 @@ const PostViewer = ({ post }) => {
 
 PostViewer.propTypes = {
   post: PT.object,
-  selectBlogPost: PT.func
+
+  selectBlogPost: PT.func,
+  handleEdit: PT.func
 };
 
 export default PostViewer;

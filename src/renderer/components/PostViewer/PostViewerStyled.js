@@ -18,6 +18,7 @@ const Styled = styled.div`
       }
       
       .post-viewer-toolbox__icon {
+        cursor: pointer;
         margin-left: 10px;
       }
       

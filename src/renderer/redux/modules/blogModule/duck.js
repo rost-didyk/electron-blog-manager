@@ -25,7 +25,9 @@ export const actionTypes = {
   SEARCH_IN_BLOG_ENTITY: 'blogModule/SEARCH_IN_BLOG_ENTITY',
   SEARCH_IN_BLOG_ENTITY_DEBOUNCED: 'blogModule/SEARCH_IN_BLOG_ENTITY_DEBOUNCED',
 
-  SELECT_BLOG_POST: 'blogModule/SELECT_BLOG_POST'
+  SELECT_BLOG_POST: 'blogModule/SELECT_BLOG_POST',
+  OPEN_BLOG_ENTITY_UPSERT_FORM: 'blogModule/OPEN_BLOG_ENTITY_UPSERT_FORM',
+  CLOSE_BLOG_ENTITY_UPSERT_FORM: 'blogModule/CLOSE_BLOG_ENTITY_UPSERT_FORM',
 };
 
 // initial state
@@ -35,54 +37,75 @@ const initialState = {
   comments: [],
   isOfflineMode: false,
   searchCriteria: '',
+  upsertEntityFormMetadata: {
+    type: null, // oneOf([posts, comments]),
+    mode: null // oneOf([create, insert])
+  }
 };
 
 // actions
 export const actions = {
-  fetchBlogEntity: () => ({
-    type: actionTypes.FETCH_BLOG_ENTITY,
-  }),
-  fetchBlogEntitySuccess: payload => ({
-    type: actionTypes.FETCH_BLOG_ENTITY_SUCCESS,
-    payload
-  }),
+  // requests
+  fetchBlogEntity: () => ({ type: actionTypes.FETCH_BLOG_ENTITY }),
+  fetchBlogEntitySuccess: payload => ({ type: actionTypes.FETCH_BLOG_ENTITY_SUCCESS, payload }),
 
-  requestError: payload => ({
-    type: actionTypes.REQUEST_ERROR,
-    payload
-  }),
-
-  selectBlogPost: postId => ({
-    type: actionTypes.SELECT_BLOG_POST,
-    payload: postId
-  }),
-
-  searchInBlogEntity: searchCriteria => ({
-    type: actionTypes.SEARCH_IN_BLOG_ENTITY,
-    payload: searchCriteria
-  }),
-  searchInBlogEntityDebaunced: searchCriteria => ({
-    type: actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED,
-    payload: searchCriteria
-  })
+  upsertBlogPost: payload => ({ type: actionTypes.UPSERT_BLOG_POST, payload }),
+  upsertBlogPostSuccess: ({ data, isInsertMode }) => ({ type: actionTypes.UPSERT_BLOG_POST_SUCCESS, payload: { data, isInsertMode } }),
 
 
+  requestError: payload => ({ type: actionTypes.REQUEST_ERROR, payload }),
+
+  // operations
+  selectBlogPost: postId => ({ type: actionTypes.SELECT_BLOG_POST, payload: postId }),
+
+  searchInBlogEntity: searchCriteria => ({ type: actionTypes.SEARCH_IN_BLOG_ENTITY, payload: searchCriteria }),
+  searchInBlogEntityDebaunced: searchCriteria => ({ type: actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED, payload: searchCriteria }),
+
+  openBlogEntityUpsertForm: (type, mode) => ({ type: actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM, payload: { type, mode } }),
+  closeBlogEntityUpsertForm: () => ({ type: actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM })
 };
 
 // reducers
 const reducers = {
-  [actionTypes.FETCH_BLOG_ENTITY]: (state, action) => ({ ...state }),
+  [actionTypes.FETCH_BLOG_ENTITY]: state => ({ ...state }),
   [actionTypes.FETCH_BLOG_ENTITY_SUCCESS]: (state, { payload }) => {
     const [ posts, comments ] = payload;
     const lastPost = posts[posts.length - 1];
     return { ...state, posts: posts.reverse(), comments, selectedPostId: lastPost.id }
   },
-  [actionTypes.SELECT_BLOG_POST]: (state, { payload: selectedPostId }) => {
-    return { ...state, selectedPostId }
+
+  [actionTypes.UPSERT_BLOG_POST_SUCCESS]: (state, { payload: { data, isInsertMode } }) => {
+
+    // insert
+    if (isInsertMode) {
+      // Api when POST always return same id (101)
+      const newPostId = (state.posts.length + 1);
+      const updatedData = { ...data, id: newPostId  };
+
+      return ({ ...state, posts: [].concat(updatedData, state.posts) });
+    }
+
+    // update
+    const updatedPosts = state.posts.map(post => {
+      return (post.id === data.id) ? data : post;
+    });
+
+    return ({ ...state, posts: updatedPosts });
+
   },
-  [actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED]: (state, { payload: searchCriteria }) => {
-    return { ...state, searchCriteria, selectedPostId: null }
-  }
+
+  [actionTypes.SELECT_BLOG_POST]: (state, { payload: selectedPostId }) => ({ ...state, selectedPostId }),
+
+  [actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED]: (state, { payload: searchCriteria }) => ({
+    ...state, searchCriteria, selectedPostId: null
+  }),
+
+  [actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM]: (state, { payload: { type, mode } }) => ({
+    ...state, upsertEntityFormMetadata: { type, mode }
+  }),
+  [actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM]: (state) => ({
+    ...state, upsertEntityFormMetadata: initialState.upsertEntityFormMetadata
+  })
 };
 
 export default handleActions(reducers, initialState);
@@ -124,5 +147,7 @@ export const selectors = {
       ...currentPost,
       comments: relatedComments
     }
-  }
+  },
+
+  getUpsertEntityFormMetadata: state => state[storeName].upsertEntityFormMetadata
 };
