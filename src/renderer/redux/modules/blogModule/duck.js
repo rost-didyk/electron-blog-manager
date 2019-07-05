@@ -6,6 +6,7 @@ export const storeName = 'blog';
 
 // action types
 export const actionTypes = {
+  SET_INITIAL_STATE_FROM_ELECTRON_STORE: 'blogModule/SET_INITIAL_STATE_FROM_ELECTRON_STORE',
   FETCH_BLOG_ENTITY: 'blogModule/FETCH_BLOG_ENTITY',
   FETCH_BLOG_ENTITY_SUCCESS: 'blogModule/FETCH_BLOG_ENTITY_SUCCESS',
 
@@ -73,7 +74,9 @@ export const actions = {
   searchInBlogEntityDebaunced: searchCriteria => ({ type: actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED, payload: searchCriteria }),
 
   openBlogEntityUpsertForm: (type, mode, entity = null) => ({ type: actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM, payload: { type, mode, entity } }),
-  closeBlogEntityUpsertForm: () => ({ type: actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM })
+  closeBlogEntityUpsertForm: () => ({ type: actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM }),
+
+  setInitialeStateFromElectron: state => ({ type: actionTypes.SET_INITIAL_STATE_FROM_ELECTRON_STORE, payload: state })
 };
 
 // reducers
@@ -158,6 +161,11 @@ const reducers = {
   }),
   [actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM]: (state) => ({
     ...state, upsertEntityFormMetadata: initialState.upsertEntityFormMetadata
+  }),
+
+  [actionTypes.SET_INITIAL_STATE_FROM_ELECTRON_STORE]: (state, { payload: initialStateFromStore }) => ({
+    ...state,
+    ...initialStateFromStore
   })
 };
 

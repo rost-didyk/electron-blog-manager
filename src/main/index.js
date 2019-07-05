@@ -1,6 +1,8 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { format as formatUrl } from 'url';
+import Storage from './Storage';
+import liseners from './ipcMain/listeners';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -57,4 +59,11 @@ app.on('activate', () => {
 // create main BrowserWindow when electron is ready
 app.on('ready', () => {
   mainWindow = createMainWindow();
+
+  mainWindow.webContents.once('dom-ready', () => {
+    const initData = Storage.get('data');
+    mainWindow.webContents.send('emitInitialStorePersistData', initData);
+  });
+
+  liseners(Storage);
 });

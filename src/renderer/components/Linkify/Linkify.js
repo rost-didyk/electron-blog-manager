@@ -15,7 +15,7 @@ const LinkOpenExternalRenderer = ({href, children}) => (
 
 LinkOpenExternalRenderer.propTypes = {
   children: PT.node,
-  href: PT.string()
+  href: PT.string
 };
 
 const Linkify = ({ children }) => <Linkifier renderer={LinkOpenExternalRenderer}>{ children }</Linkifier>;
