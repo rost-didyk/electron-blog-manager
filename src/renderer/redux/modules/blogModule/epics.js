@@ -1,10 +1,11 @@
 import { combineEpics, ofType } from 'redux-observable';
-import { mergeMap, catchError, map, debounceTime, flatMap  } from 'rxjs/operators';
+import { mergeMap, catchError, map, debounceTime, flatMap, tap, ignoreElements  } from 'rxjs/operators';
 import { ajax } from 'rxjs/ajax';
 import { forkJoin, concat, of } from 'rxjs';
 
 import endpoints from '../../../config/endpoints';
 import { actionTypes, actions } from './duck';
+import { saveDataToElectronStorage } from '../../../electron/senders';
 
 export default combineEpics(
   // fetch blog entity
@@ -17,7 +18,6 @@ export default combineEpics(
       ).pipe(
         map(response => actions.fetchBlogEntitySuccess(response)) ,
         catchError(({ status, message }) => {
-          alert(`Network error: ${status} - ${message}`);
           return of(actions.requestError({ status, message }));
         })
       )
@@ -76,7 +76,22 @@ export default combineEpics(
     ofType(actionTypes.SEARCH_IN_BLOG_ENTITY),
     debounceTime(200),
     map(({ payload }) => actions.searchInBlogEntityDebaunced(payload)) ,
-  )
+  ),
+  // Save to electron store
+  (action$, state$) => action$.pipe(
+    ofType(
+      actionTypes.FETCH_BLOG_ENTITY_SUCCESS,
+      actionTypes.UPSERT_BLOG_POST_SUCCESS,
+      actionTypes.REMOVE_BLOG_POST_SUCCESS,
+      actionTypes.UPSERT_BLOG_POST_COMMENT_SUCCESS,
+      actionTypes.REMOVE_BLOG_POST_COMMENT_SUCCESS,
+    ),
+    tap(() => {
+      const { posts, comments } = state$.value.blog;
+      saveDataToElectronStorage({ posts, comments });
+    }),
+    ignoreElements()
+  ),
 )
 
 

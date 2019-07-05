@@ -10,7 +10,15 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 let mainWindow;
 
 function createMainWindow() {
-  const window = new BrowserWindow({webPreferences: {nodeIntegration: true}});
+  const window = new BrowserWindow({
+    width: 1100,
+    minWidth: 400,
+    height: 600,
+    minHeight: 500,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
 
   if (isDevelopment) {
     window.webContents.openDevTools();
@@ -38,6 +46,13 @@ function createMainWindow() {
     })
   });
 
+  window.webContents.once('dom-ready', () => {
+    const initData = Storage.get('data');
+    window.webContents.send('emitInitialStorePersistData', initData);
+  });
+
+  liseners(Storage);
+
   return window;
 }
 
@@ -59,11 +74,4 @@ app.on('activate', () => {
 // create main BrowserWindow when electron is ready
 app.on('ready', () => {
   mainWindow = createMainWindow();
-
-  mainWindow.webContents.once('dom-ready', () => {
-    const initData = Storage.get('data');
-    mainWindow.webContents.send('emitInitialStorePersistData', initData);
-  });
-
-  liseners(Storage);
 });

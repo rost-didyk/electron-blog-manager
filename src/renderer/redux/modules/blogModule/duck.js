@@ -166,7 +166,9 @@ const reducers = {
   [actionTypes.SET_INITIAL_STATE_FROM_ELECTRON_STORE]: (state, { payload: initialStateFromStore }) => ({
     ...state,
     ...initialStateFromStore
-  })
+  }),
+
+  [actionTypes.REQUEST_ERROR]: state => ({ ...state,  isLoading: false })
 };
 
 export default handleActions(reducers, initialState);
