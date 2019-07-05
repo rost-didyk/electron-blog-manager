@@ -16,7 +16,10 @@ export default combineEpics(
         ajax.getJSON(endpoints.COMMENTS_URI),
       ).pipe(
         map(response => actions.fetchBlogEntitySuccess(response)) ,
-        catchError(({ status, message }) => of(actions.requestError({ status, message })))
+        catchError(({ status, message }) => {
+          alert(`Network error: ${status} - ${message}`);
+          return of(actions.requestError({ status, message }));
+        })
       )
     }),
   ),
@@ -44,6 +47,30 @@ export default combineEpics(
 
     })
   ),
+  // upsert blog comment
+  action$ => action$.pipe(
+    ofType(actionTypes.UPSERT_BLOG_POST_COMMENT),
+    mergeMap(({ payload }) => {
+      const method = payload.id ? 'PUT': 'POST';
+      const url = payload.id ?
+        endpoints.COMMENTS_URI + '/' + payload.id :
+        endpoints.COMMENTS_URI;
+
+      return ajaxCall( method, url, payload, actions.upsertBlogCommentSuccess, { isInsertMode: payload.id === null } );
+
+    })
+  ),
+  // delete blog comments
+  action$ => action$.pipe(
+    ofType(actionTypes.REMOVE_BLOG_POST_COMMENT),
+    mergeMap(({ payload: commentId }) => {
+      const method = 'DELETE';
+      const url = endpoints.POSTS_URI + '/' + commentId;
+
+      return ajaxCall( method, url, null, actions.removeBlogCommentSuccess, { commentId } );
+
+    })
+  ),
   // search DEBOUNCED
   action$ => action$.pipe(
     ofType(actionTypes.SEARCH_IN_BLOG_ENTITY),
@@ -64,6 +91,7 @@ function ajaxCall( method, url, body, successAction, passDataToSuccessAction = {
         );
       }),
       catchError(({ status, message }) => {
+        alert(`Network error: ${status} - ${message}. This occurred because http://jsonplaceholder.typicode.com not support Update or Delete for created entity.`);
         return concat(
           of(actions.requestError({ status, message })),
           of(actions.closeBlogEntityUpsertForm())

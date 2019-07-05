@@ -11,6 +11,8 @@ import Sidebar from './components/Sidebar/Sidebar';
 import PostList from './components/PostList/PostList';
 import PostViewer from './components/PostViewer/PostViewer';
 import PostUpsertForm from './components/PostUpsertForm/PostUpsertForm';
+import CommentsUpsertForm from './components/CommentsUpsertForm/CommentsUpsertForm';
+import Loader from './components/Loader/Loader';
 
 const StyledMain = styled.main`
   max-height: 100vh;
@@ -42,7 +44,10 @@ const App = ({
   openBlogEntityUpsertForm,
   closeBlogEntityUpsertForm,
   upsertBlogPost,
-  removeBlogPost
+  removeBlogPost,
+  upsertBlogComment,
+  removeBlogComment,
+  isLoading,
 }) => {
 
   useEffect(() => { fetchBlogEntity() }, []);
@@ -62,8 +67,9 @@ const App = ({
         <div className="app-position app-position--grow">
           <PostViewer
             post={selectedPost}
-            handleEdit={openBlogEntityUpsertForm}
-            handelRemove={removeBlogPost}
+            handleOpenBlogEntityUpsertForm={openBlogEntityUpsertForm}
+            handelRemoveBlogPost={removeBlogPost}
+            handleRemoveBlogComments={removeBlogComment}
           />
         </div>
       </StyledContainer>
@@ -71,11 +77,23 @@ const App = ({
       { upsertEntityFormMetadata && upsertEntityFormMetadata.type === 'post' && (
         <PostUpsertForm
           mode={upsertEntityFormMetadata.mode}
-          post={selectedPost}
+          post={upsertEntityFormMetadata.entity}
           handleSuccess={upsertBlogPost}
           handleClose={closeBlogEntityUpsertForm}
         />
       ) }
+
+      { upsertEntityFormMetadata && upsertEntityFormMetadata.type === 'comment' && (
+        <CommentsUpsertForm
+          mode={upsertEntityFormMetadata.mode}
+          comment={upsertEntityFormMetadata.entity}
+          currentPostId={selectedPost && selectedPost.id}
+          handleSuccess={upsertBlogComment}
+          handleClose={closeBlogEntityUpsertForm}
+        />
+      ) }
+
+      { isLoading && <Loader /> }
 
     </StyledMain>
   )
@@ -86,6 +104,7 @@ App.propTypes = {
   blogComments: PT.array.isRequired,
   selectedPost: PT.object,
   upsertEntityFormMetadata: PT.object,
+  isLoading: PT.bool,
 
   fetchBlogEntity: PT.func,
   selectBlogPost: PT.func,
@@ -93,7 +112,9 @@ App.propTypes = {
   openBlogEntityUpsertForm: PT.func,
   closeBlogEntityUpsertForm: PT.func,
   upsertBlogPost: PT.func,
-  removeBlogPost: PT.func
+  removeBlogPost: PT.func,
+  upsertBlogComment: PT.func,
+  removeBlogComment: PT.func
 };
 
 const EnchApp = flowRight([withBlogModule()])(App);

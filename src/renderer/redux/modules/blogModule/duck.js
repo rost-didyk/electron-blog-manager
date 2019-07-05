@@ -1,4 +1,5 @@
 import { handleActions } from 'redux-actions';
+import orderBy from 'lodash/orderBy';
 
 // store name
 export const storeName = 'blog';
@@ -38,9 +39,11 @@ const initialState = {
   isOfflineMode: false,
   searchCriteria: '',
   upsertEntityFormMetadata: {
-    type: null, // oneOf([posts, comments]),
-    mode: null // oneOf([create, insert])
-  }
+    type: null, // oneOf([post, comment]),
+    mode: null, // oneOf([create, edit]),
+    entity: null // entity for edit
+  },
+  isLoading: false,
 };
 
 // actions
@@ -55,6 +58,12 @@ export const actions = {
   removeBlogPost: postId => ({ type: actionTypes.REMOVE_BLOG_POST, payload: postId }),
   removeBlogPostSuccess: postId => ({ type: actionTypes.REMOVE_BLOG_POST_SUCCESS, payload: postId }),
 
+  upsertBlogComment: payload => ({ type: actionTypes.UPSERT_BLOG_POST_COMMENT, payload }),
+  upsertBlogCommentSuccess: ({ data, isInsertMode }) => ({ type: actionTypes.UPSERT_BLOG_POST_COMMENT_SUCCESS, payload: { data, isInsertMode } }),
+
+  removeBlogComment: commentId => ({ type: actionTypes.REMOVE_BLOG_POST_COMMENT, payload: commentId }),
+  removeBlogCommentSuccess: commentId => ({ type: actionTypes.REMOVE_BLOG_POST_COMMENT_SUCCESS, payload: commentId }),
+
   requestError: payload => ({ type: actionTypes.REQUEST_ERROR, payload }),
 
   // operations
@@ -63,19 +72,20 @@ export const actions = {
   searchInBlogEntity: searchCriteria => ({ type: actionTypes.SEARCH_IN_BLOG_ENTITY, payload: searchCriteria }),
   searchInBlogEntityDebaunced: searchCriteria => ({ type: actionTypes.SEARCH_IN_BLOG_ENTITY_DEBOUNCED, payload: searchCriteria }),
 
-  openBlogEntityUpsertForm: (type, mode) => ({ type: actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM, payload: { type, mode } }),
+  openBlogEntityUpsertForm: (type, mode, entity = null) => ({ type: actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM, payload: { type, mode, entity } }),
   closeBlogEntityUpsertForm: () => ({ type: actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM })
 };
 
 // reducers
 const reducers = {
-  [actionTypes.FETCH_BLOG_ENTITY]: state => ({ ...state }),
+  [actionTypes.FETCH_BLOG_ENTITY]: state => ({ ...state, isLoading: true }),
   [actionTypes.FETCH_BLOG_ENTITY_SUCCESS]: (state, { payload }) => {
     const [ posts, comments ] = payload;
     const lastPost = posts[posts.length - 1];
-    return { ...state, posts: posts.reverse(), comments, selectedPostId: lastPost.id }
+    return { ...state, posts: posts.reverse(), comments, selectedPostId: lastPost.id, isLoading: false }
   },
 
+  [actionTypes.UPSERT_BLOG_POST]: state => ({ ...state, isLoading: true }),
   [actionTypes.UPSERT_BLOG_POST_SUCCESS]: (state, { payload: { data, isInsertMode } }) => {
 
     // insert
@@ -84,7 +94,7 @@ const reducers = {
       const newPostId = (state.posts.length + 1);
       const updatedData = { ...data, id: newPostId  };
 
-      return ({ ...state, posts: [].concat(updatedData, state.posts) });
+      return ({ ...state, posts: [].concat(updatedData, state.posts), isLoading: false });
     }
 
     // update
@@ -92,15 +102,48 @@ const reducers = {
       return (post.id === data.id) ? data : post;
     });
 
-    return ({ ...state, posts: updatedPosts });
+    return ({ ...state, posts: updatedPosts, isLoading: false });
 
   },
 
+  [actionTypes.REMOVE_BLOG_POST]: state => ({ ...state, isLoading: true }),
   [actionTypes.REMOVE_BLOG_POST_SUCCESS]: (state, { payload: { postId } }) => {
+    const filteredComments = state.comments.filter(comment => comment.postId !== postId);
+
     return {
       ...state,
       posts: state.posts.filter(post => post.id !== postId),
-      selectedPostId: null
+      comments: filteredComments,
+      selectedPostId: null,
+      isLoading: false
+    }
+  },
+
+  [actionTypes.UPSERT_BLOG_POST_COMMENT]: state => ({ ...state, isLoading: true }),
+  [actionTypes.UPSERT_BLOG_POST_COMMENT_SUCCESS]: (state, { payload: { data, isInsertMode } }) => {
+    // insert
+    if (isInsertMode) {
+      // Api when POST always return same id (501)
+      const newId = (state.comments.length + 1);
+      const updatedData = { ...data, id: newId  };
+      return ({ ...state, comments: [].concat(state.comments, updatedData), isLoading: false });
+    }
+
+    // update
+    const updatedComments = state.comments.map(comment => {
+      return (comment.id === data.id) ? data : comment;
+    });
+
+    return ({ ...state, comments: updatedComments, isLoading: false });
+
+  },
+
+  [actionTypes.REMOVE_BLOG_POST_COMMENT]: state => ({ ...state, isLoading: true }),
+  [actionTypes.REMOVE_BLOG_POST_COMMENT_SUCCESS]: (state, { payload: { commentId } }) => {
+    return {
+      ...state,
+      comments: state.comments.filter(comment => comment.id !== commentId),
+      isLoading: false
     }
   },
 
@@ -110,8 +153,8 @@ const reducers = {
     ...state, searchCriteria, selectedPostId: null
   }),
 
-  [actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM]: (state, { payload: { type, mode } }) => ({
-    ...state, upsertEntityFormMetadata: { type, mode }
+  [actionTypes.OPEN_BLOG_ENTITY_UPSERT_FORM]: (state, { payload: { type, mode, entity } }) => ({
+    ...state, upsertEntityFormMetadata: { type, mode, entity }
   }),
   [actionTypes.CLOSE_BLOG_ENTITY_UPSERT_FORM]: (state) => ({
     ...state, upsertEntityFormMetadata: initialState.upsertEntityFormMetadata
@@ -122,6 +165,7 @@ export default handleActions(reducers, initialState);
 
 // selectors
 export const selectors = {
+  getIsLoadingStatus: state => state[storeName].isLoading,
   getPosts: state => {
     const { posts, comments, searchCriteria } = state[storeName];
 
@@ -152,10 +196,11 @@ export const selectors = {
       if (comment.postId === selectedPostId) acc.push(comment);
       return acc;
     }, []);
+    const orderedRelatedComments = orderBy(relatedComments, ['id'], ['desc']);
 
     return {
       ...currentPost,
-      comments: relatedComments
+      comments: orderedRelatedComments
     }
   },
 

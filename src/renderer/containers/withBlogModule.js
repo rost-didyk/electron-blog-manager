@@ -7,7 +7,8 @@ export default () => connect(
     blogPosts: selectors.getPosts(state),
     blogComments: selectors.getComments(state),
     selectedPost: selectors.getSelectedPost(state),
-    upsertEntityFormMetadata: selectors.getUpsertEntityFormMetadata(state)
+    upsertEntityFormMetadata: selectors.getUpsertEntityFormMetadata(state),
+    isLoading: selectors.getIsLoadingStatus(state)
   }),
   dispatch => bindActionCreators(actions, dispatch)
 );
