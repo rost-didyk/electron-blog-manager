@@ -5,12 +5,13 @@ import { Toast, ToastBody, ToastHeader } from 'reactstrap';
 import { FaPlus } from 'react-icons/fa';
 
 import Styled from './PostViewerStyled';
+import Linkify from '../../components/Linkify/Linkify';
 
 const PostViewer = ({
-    post,
-    handleOpenBlogEntityUpsertForm,
-    handelRemoveBlogPost,
-    handleRemoveBlogComments
+  post,
+  handleOpenBlogEntityUpsertForm,
+  handelRemoveBlogPost,
+  handleRemoveBlogComments
 }) => {
 
   if(!post) return (
@@ -41,7 +42,9 @@ const PostViewer = ({
         </div>
       </div>
       <div className="post-viewer-content">
-        <div className="post-viewer-content__body">{ post.body }</div>
+        <div className="post-viewer-content__body">
+          <Linkify>{ post.body }</Linkify>
+        </div>
         <div className="post-viewer-content__comments">
           <p className="post-viewer-content__comments-count">{ post.comments.length } comments</p>
           <button
@@ -69,7 +72,7 @@ const PostViewer = ({
                   </div>
                 </ToastHeader>
                 <ToastBody>
-                  { comment.body }
+                  <Linkify>{ comment.body }</Linkify>
                 </ToastBody>
               </Toast>
             </div>
