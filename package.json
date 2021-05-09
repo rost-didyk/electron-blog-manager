@@ -15,7 +15,7 @@
   "dependencies": {
     "electron-store": "^4.0.0",
     "formik": "^1.5.7",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
